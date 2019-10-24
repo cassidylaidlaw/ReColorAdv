@@ -26,4 +26,4 @@ If you find this repository useful for your research, please cite our paper as f
 
 ## Contact
 
-For questions about the paper or code, please contact laidlaw.cassidy@gmail.com.
+For questions about the paper or code, please contact claidlaw@umd.edu.
