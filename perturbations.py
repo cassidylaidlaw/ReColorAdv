@@ -52,6 +52,7 @@ class ReColorAdv(ap.AdversarialPerturbation):
         super().setup(originals)
         self.xform = self.perturbation_params.xform_class(
             shape=originals.shape, manual_gpu=self.use_gpu,
+            cspace=self.cspace,
             **(self.perturbation_params.xform_params or {}),
         )
         self.initialized = True

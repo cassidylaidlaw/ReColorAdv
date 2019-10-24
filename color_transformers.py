@@ -146,6 +146,8 @@ class FullSpatial(ParameterizedTransformation):
         img_shape = kwargs['shape']
         self.img_shape = img_shape
 
+        self.cspace = kwargs.get('cspace')
+
         batch_size = self.img_shape[0]
         self.identity_params = FullSpatial.construct_identity_params(
             batch_size,
@@ -165,6 +167,7 @@ class FullSpatial(ParameterizedTransformation):
             resolution_x=self.resolution_x,
             resolution_y=self.resolution_y,
             resolution_z=self.resolution_z,
+            cspace=self.cspace,
         )
         if example_index is None:
             my_params = self.xform_params
@@ -192,10 +195,26 @@ class FullSpatial(ParameterizedTransformation):
 
     def clip_params(self):
         """
-        Clips the parameters to be between 0 and 1.
+        Clips the parameters to be between 0 and 1 and also within the color
+        space's gamut.
         """
 
         clamp_params = torch.clamp(self.xform_params, 0, 1).data
+
+        params_shape = self.xform_params.size()
+        flattened_params = (
+            clamp_params
+            .permute(0, 4, 1, 2, 3)
+            .reshape(params_shape[0], 3, -1, 1)
+        )
+        gamut_params = self.cspace.from_rgb(self.cspace.to_rgb(
+            flattened_params))
+        clamp_params = (
+            gamut_params
+            .permute(0, 2, 3, 1)
+            .reshape(*params_shape)
+        )
+
         change_in_params = clamp_params - self.xform_params.data
         self.xform_params.data.add_(change_in_params)
 
@@ -212,7 +231,8 @@ class FullSpatial(ParameterizedTransformation):
                                 manual_gpu=self.use_gpu,
                                 resolution_x=self.resolution_x,
                                 resolution_y=self.resolution_y,
-                                resolution_z=self.resolution_z)
+                                resolution_z=self.resolution_z,
+                                cspace=self.cspace)
         new_params = utils.fold_mask(self.xform_params.data,
                                      other.xform_params.data, self_mask)
         new_xform.xform_params = nn.Parameter(new_params)
