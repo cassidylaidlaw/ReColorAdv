@@ -97,7 +97,7 @@ class ReColorAdv(ap.AdversarialPerturbation):
                                                    self.lp_style,
                                                    self.lp_bound)
 
-        param.data.add_(self.xform.identity_params(self.xform.img_shape) +
+        param.data.add_(self.xform.identity_params +
                         random_perturb - self.xform.xform_params.data)
 
     @initialized
