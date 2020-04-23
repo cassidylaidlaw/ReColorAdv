@@ -154,7 +154,7 @@ class FullSpatial(ParameterizedTransformation):
             self.resolution_x,
             self.resolution_y,
             self.resolution_z,
-            self.use_gpu,
+            torch.cuda.current_device() if self.use_gpu else None,
         )
         self.xform_params = nn.Parameter(
             torch.empty_like(self.identity_params)
@@ -347,12 +347,12 @@ class FullSpatial(ParameterizedTransformation):
     @staticmethod
     @lru_cache(maxsize=10)
     def construct_identity_params(batch_size, resolution_x, resolution_y,
-                                  resolution_z, use_gpu=False):
+                                  resolution_z, device):
         identity_params = torch.empty(
             batch_size, resolution_x, resolution_y,
             resolution_z, 3,
             dtype=torch.float,
-            device=torch.device('cuda') if use_gpu else None,
+            device=device,
         )
         for x in range(resolution_x):
             for y in range(resolution_y):
