@@ -13,6 +13,12 @@ ReColorAdv depends on the [`mister_ed`](https://github.com/revbucket/mister_ed) 
 
 This will also download the CIFAR-10 dataset and pretrained models for it. Once `mister_ed` is installed, you can experiment with the ReColorAdv attack, by itself and combined with other attacks, in the `getting_started.ipynb` Jupyter notebook.
 
+## Example Evaluation Script
+
+The script `evaluate_imagenet.py` will download a ResNet-50 trained on ImageNet and evaluate it against the ReColorAdv attack:
+
+    python evaluate_imagenet.py --imagenet_path /path/to/ILSVRC2012 --batch_size 50
+
 ## Citation
 
 If you find this repository useful for your research, please cite our paper as follows:
