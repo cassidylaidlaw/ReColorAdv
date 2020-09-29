@@ -16,74 +16,40 @@ from recoloradv.mister_ed import adversarial_perturbations as ap
 from recoloradv.mister_ed import adversarial_attacks as aa
 from recoloradv.mister_ed import spatial_transformers as st
 from recoloradv.mister_ed.utils import pytorch_utils as utils
+from recoloradv.mister_ed.cifar10 import cifar_loader
 
 # ReColorAdv
 from recoloradv import perturbations as pt
 from recoloradv import color_transformers as ct
 from recoloradv import color_spaces as cs
+from recoloradv.utils import get_attack_from_name, load_pretrained_cifar10_model
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        description='Evaluate a ResNet-50 trained on Imagenet '
-        'against ReColorAdv'
+        description='Evaluate a model trained on CIFAR-10 '
+        'against ReColorAdv and other attacks'
     )
 
-    parser.add_argument('--imagenet_path', type=str, required=True,
-                        help='path to ImageNet dataset')
+    parser.add_argument('--checkpoint', type=str,
+                        help='checkpoint to evaluate')
+    parser.add_argument('--attack', type=str,
+                        help='attack to run, such as "recoloradv" or '
+                        '"stadv+delta"')
     parser.add_argument('--batch_size', type=int, default=100,
                         help='number of examples/minibatch')
     parser.add_argument('--num_batches', type=int, required=False,
                         help='number of batches (default entire dataset)')
     args = parser.parse_args()
 
-    model = resnet50(pretrained=True, progress=True)
-    normalizer = utils.DifferentiableNormalize(mean=[0.485, 0.456, 0.406],
-                                               std=[0.229, 0.224, 0.225])
-
-    dataset = ImageNet(
-        args.imagenet_path,
-        split='val',
-        transform=transforms.Compose([
-            transforms.CenterCrop(224),
-            transforms.ToTensor(),
-        ]),
-    )
-    val_loader = DataLoader(
-        dataset,
-        batch_size=args.batch_size,
-        shuffle=True,
-    )
+    model, normalizer = load_pretrained_cifar10_model(args.checkpoint)
+    val_loader = cifar_loader.load_cifar_data('val', batch_size=args.batch_size)
 
     model.eval()
     if torch.cuda.is_available():
         model.cuda()
 
-    cw_loss = lf.CWLossF6(model, normalizer, kappa=float('inf'))
-    perturbation_loss = lf.PerturbationNormLoss(lp=2)
-    adv_loss = lf.RegularizedLoss(
-        {'cw': cw_loss, 'pert': perturbation_loss},
-        {'cw': 1.0, 'pert': 0.05},
-        negate=True,
-    )
-
-    pgd_attack = aa.PGD(
-        model,
-        normalizer,
-        ap.ThreatModel(pt.ReColorAdv, {
-            'xform_class': ct.FullSpatial,
-            'cspace': cs.CIELUVColorSpace(),
-            'lp_style': 'inf',
-            'lp_bound': 0.06,
-            'xform_params': {
-              'resolution_x': 16,
-              'resolution_y': 32,
-              'resolution_z': 32,
-            },
-            'use_smooth_loss': True,
-        }),
-        adv_loss,
-    )
+    attack = get_attack_from_name(args.attack, model, normalizer)
 
     batches_correct = []
     for batch_index, (inputs, labels) in enumerate(val_loader):
@@ -97,15 +63,10 @@ if __name__ == '__main__':
             inputs = inputs.cuda()
             labels = labels.cuda()
 
-        adv_inputs = pgd_attack.attack(
+        adv_inputs = attack.attack(
             inputs,
             labels,
-            optimizer=optim.Adam,
-            optimizer_kwargs={'lr': 0.001},
-            signed=False,
-            verbose=False,
-            num_iterations=(100, 300),
-        ).adversarial_tensors()
+        )[0]
         with torch.no_grad():
             adv_logits = model(normalizer(adv_inputs))
         batch_correct = (adv_logits.argmax(1) == labels).detach()
