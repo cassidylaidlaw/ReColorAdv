@@ -1,12 +1,6 @@
-""" Loads the config.json into python readable format """
-
-import json
 import os
 
-config_path = os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                           'config.json'))
-config_dir = os.path.dirname(config_path)
-config_dict = json.loads(open(config_path, 'rb').read())
+config_dir = os.path.abspath(os.path.dirname(__file__))
 
 def path_resolver(path):
     if path.startswith('~/'):
@@ -16,23 +10,19 @@ def path_resolver(path):
         return os.path.join(*[config_dir] + path.split('/')[1:])
 
 
-unexpanded_dataset_dir = config_dict['dataset_path']
-unexpanded_model_path = config_dict['model_path']
-unexpanded_output_image_path = config_dict['output_image_path']
-
-DEFAULT_DATASETS_DIR = path_resolver(unexpanded_dataset_dir)
-MODEL_PATH = path_resolver(unexpanded_model_path)
-OUTPUT_IMAGE_PATH = path_resolver(unexpanded_output_image_path)
+DEFAULT_DATASETS_DIR = path_resolver('~/datasets')
+MODEL_PATH = path_resolver('./pretrained_models/')
+OUTPUT_IMAGE_PATH = path_resolver('./output_images/')
 
 
-DEFAULT_BATCH_SIZE = config_dict['batch_size']
-DEFAULT_WORKERS = config_dict['default_workers']
-CIFAR10_MEANS = config_dict['cifar10_means']
-CIFAR10_STDS = config_dict['cifar10_stds']
+DEFAULT_BATCH_SIZE = 128
+DEFAULT_WORKERS = 4
+CIFAR10_MEANS = [0.485, 0.456, 0.406]
+CIFAR10_STDS = [0.229, 0.224, 0.225]
 
-WIDE_CIFAR10_MEANS = config_dict['wide_cifar10_means']
-WIDE_CIFAR10_STDS = config_dict['wide_cifar10_stds']
+WIDE_CIFAR10_MEANS = [0.4914, 0.4822, 0.4465]
+WIDE_CIFAR10_STDS = [0.2023, 0.1994, 0.2010]
 
 
-IMAGENET_MEANS = config_dict['imagenet_means']
-IMAGENET_STDS = config_dict['imagenet_stds']
+IMAGENET_MEANS = [0.485, 0.456, 0.406]
+IMAGENET_STDS = [0.229, 0.224, 0.225]
