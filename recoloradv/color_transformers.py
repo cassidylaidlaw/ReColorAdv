@@ -4,9 +4,9 @@ Contains various parameterizations for spatial transformation in 3D color space.
 
 import torch
 import torch.nn as nn
-import utils.pytorch_utils as utils
+from .mister_ed.utils import pytorch_utils as utils
 from torch.autograd import Variable
-import norms
+from recoloradv import norms
 from functools import lru_cache
 
 

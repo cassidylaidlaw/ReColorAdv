@@ -1,13 +1,13 @@
 import torch
 import torch.nn as nn
 
-import adversarial_perturbations as ap
-from adversarial_perturbations import initialized
-from utils import pytorch_utils as utils
+from .mister_ed import adversarial_perturbations as ap
+from .mister_ed.adversarial_perturbations import initialized
+from .mister_ed.utils import pytorch_utils as utils
 
-import color_transformers as ct
-import norms
-import color_spaces as cs
+from . import color_transformers as ct
+from . import norms
+from . import color_spaces as cs
 
 
 class ReColorAdv(ap.AdversarialPerturbation):
