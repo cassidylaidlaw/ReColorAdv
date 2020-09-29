@@ -9,20 +9,18 @@ from torchvision.models import resnet50
 from torchvision.datasets import ImageNet
 from torchvision import transforms
 
-sys.path.append(os.path.abspath('mister_ed'))
-
 # mister_ed
-import loss_functions as lf
-import adversarial_training as advtrain
-import adversarial_perturbations as ap 
-import adversarial_attacks as aa
-import spatial_transformers as st
-import utils.pytorch_utils as utils
+from recoloradv.mister_ed import loss_functions as lf
+from recoloradv.mister_ed import adversarial_training as advtrain
+from recoloradv.mister_ed import adversarial_perturbations as ap 
+from recoloradv.mister_ed import adversarial_attacks as aa
+from recoloradv.mister_ed import spatial_transformers as st
+from recoloradv.mister_ed.utils import pytorch_utils as utils
 
 # ReColorAdv
-import perturbations as pt
-import color_transformers as ct
-import color_spaces as cs
+from recoloradv import perturbations as pt
+from recoloradv import color_transformers as ct
+from recoloradv import color_spaces as cs
 
 
 if __name__ == '__main__':
@@ -33,7 +31,7 @@ if __name__ == '__main__':
 
     parser.add_argument('--imagenet_path', type=str, required=True,
                         help='path to ImageNet dataset')
-    parser.add_argument('--batch_size', type=int, default=100, required=True,
+    parser.add_argument('--batch_size', type=int, default=100,
                         help='number of examples/minibatch')
     parser.add_argument('--num_batches', type=int, required=False,
                         help='number of batches (default entire dataset)')

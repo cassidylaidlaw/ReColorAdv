@@ -4,10 +4,10 @@ Contains classes that convert from RGB to various other color spaces and back.
 
 import torch
 import torch.nn as nn
-import utils.pytorch_utils as utils
+from .mister_ed.utils import pytorch_utils as utils
 from torch.autograd import Variable
 import numpy as np
-import norms
+from recoloradv import norms
 import math
 
 
@@ -34,7 +34,7 @@ class ColorSpace(object):
 class RGBColorSpace(ColorSpace):
     """
     RGB color space. Just applies identity transformation.
-    """
+    """ 
 
     def from_rgb(self, imgs):
         return imgs
